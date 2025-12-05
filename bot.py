@@ -1,18 +1,22 @@
-
-
-from discord.ext import commands, tasks
 import discord
+from discord.ext import commands, tasks
 import nest_asyncio
 from dataclasses import dataclass
 import datetime
 import re
 import math
 from zoneinfo import ZoneInfo
-import os
 
-bot_token = os.getenv("DISCORD_TOKEN")
-chat_ids = os.getenv("CHAT_IDS").split(",")  # list string
-chat_ids = [int(x.strip()) for x in chat_ids]  # list int
+# Lấy bot_token & chat ids từ biến môi trường
+bot_token = os.getenv("BOT_TOKEN")
+chat_ids_raw = os.getenv("CHAT_IDS", "")
+
+# Chuyển chuỗi CHAT_IDS thành list số int
+chat_ids = []
+if chat_ids_raw:
+    for cid in chat_ids_raw.split(","):
+        if cid.strip().isdigit():
+            chat_ids.append(int(cid.strip()))
 
 sessions = {}
 
@@ -22,8 +26,6 @@ class Session:
     start_time: int = 0
     end_time: int = 0
 
-intents = discord.Intents.default()
-intents.message_content = True
 bot = commands.Bot(command_prefix='-', intents=discord.Intents.all())
 
 # KHỞI ĐỘNG
@@ -39,9 +41,15 @@ async def on_ready():
 
 # XIN CHÀO VÀ TẠM BIỆT
 
+# Xin chào
 @bot.command()
 async def hello(ctx):
     await ctx.send("Xin chào, Phi hành gia! 'Sunday' có thể giúp gì được cho bạn?")
+
+# Tạm biệt
+@bot.command()
+async def goodbye(ctx):
+    await ctx.send("Chào tạm biệt, Phi hành gia! 'Sunday' rất hy vọng có thể gặp lại bạn!")
 
 # LÀM TOÁN
 
@@ -164,7 +172,7 @@ async def end(ctx):
   human_readable_duration = str(datetime.timedelta(seconds=duration))
 
   del sessions[user_id]
-  
+
   await ctx.send(f"Phiên làm việc của bạn kết thúc lúc **{human_readable_time}** và kéo dài **{human_readable_duration}**!")
 
 
